@@ -30,7 +30,7 @@ TEXTILE_FILE=textile_$TEXTILE_VERSION.tar.gz
 if ! md5sum $TEXTILE_FILE | grep -qw $TEXTILE_MD5 2>/dev/null
 then
   rm -f $TEXTILE_FILE
-  $WGET http://textile.thresholdstate.com/file_download/2/$TEXTILE_FILE
+  $WGET https://github.com/tomclegg/wikifarm/raw/master/deps/$TEXTILE_FILE
 fi
 
 # Install CodeIgniter framework
