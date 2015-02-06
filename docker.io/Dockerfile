@@ -82,6 +82,28 @@ RUN cd /get-evidence/server/script/ && \
   . /get-evidence/server/script/config-local.sh && \
   sudo -u $USER mkdir -p $TMP $UPLOAD $LOG $CONFIG $DATA
 
+RUN alias source='.' && cd /get-evidence/server/script && \
+  export USER=www-data && \
+  export SOURCE=/get-evidence CORE=/get-evidence/server && \
+  export SCRIPT_DIR=/get-evidence/server/script && \
+  . $SCRIPT_DIR/configure.sh && \
+  . ./defaults.sh && \
+  perl -p -e 's/%([A-Z]+)%/$ENV{$1}/g' \
+    < $SOURCE/server/script/genome-analyzer.in \
+    > /etc/init.d/genome-analyzer.tmp && \
+  chmod 755 /etc/init.d/genome-analyzer.tmp && \
+  chown 0:0 /etc/init.d/genome-analyzer.tmp && \
+  mv /etc/init.d/genome-analyzer.tmp /etc/init.d/genome-analyzer && \
+  update-rc.d genome-analyzer start 20 2 3 4 5 . stop 80 0 1 6 .
+
+#RUN cd /get-evidence/server/script && \
+#  . ./config-local.sh && \
+#  sudo -u $USER ./install-user.sh
+
+#RUN cd /get-evidence/server && \
+#  python setup.py build_ext --inplace && \
+#  echo "12 3 * * * $USER cd /get-evidence && make daily" | sudo tee /etc/cron.d/get-evidence
+
 
 EXPOSE 80
 
