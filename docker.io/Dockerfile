@@ -81,3 +81,10 @@ RUN cd /get-evidence/server/script/ && \
   BASE_URL=http://localhost/ ./configure.sh && \
   . /get-evidence/server/script/config-local.sh && \
   sudo -u $USER mkdir -p $TMP $UPLOAD $LOG $CONFIG $DATA
+
+
+EXPOSE 80
+
+COPY ./startup_and_persist.sh /root/startup_and_persist.sh
+
+CMD [ "/root/startup_and_persist.sh" ]
