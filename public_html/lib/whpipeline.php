@@ -3,7 +3,40 @@
 // Copyright: see COPYING
 // Authors: see git-blame(1)
 
+// wh is the name of the 'old' arvados/keep (wh stands for 'ware house').
+// Instead of creating files in the local file system, the 'genome'
+// view will query the Arvados API directly and fetch the relevant
+//
+//
 function run_whpipeline($locator, $shasum, $quick=false)
+{
+  // submit the dataset for processing via whpipeline
+  $in_dir = $GLOBALS['gBackendBaseDir'].'/upload/'.$shasum;
+  $out_dir = $in_dir . '-out';
+  @mkdir($in_dir);
+  @mkdir($out_dir);
+  if (!is_link($in_dir.'/input.locator')) {
+      @symlink($locator, $in_dir.'/input.locator');
+  }
+  $status_json = $out_dir.'/whpipeline-status.json';
+
+  shell_exec(" echo cp >> /tmp/log2 ");
+
+  #$cmd = "submit_GE_pipeline";
+  $cmd = "/get-evidence/public_html/submit_GE_pipeline";
+  $cmd .= ' '.escapeshellarg( $locator );
+  $cmd .= ' 2>&1 > '.escapeshellarg("$out_dir/whpipeline.stdout");
+
+  ##DEBUG
+  $z = 'echo ' . escapeshellarg($cmd) . ' | at now';
+  shell_exec( " echo RUNNING ".escapeshellarg($z)." >> /tmp/log " );
+  shell_exec( "echo 'echo hello '`date`' >> /tmp/t.log ' | at now" );
+
+
+  shell_exec('echo ' . escapeshellarg($cmd) . ' | at now');
+}
+
+function run_whpipeline_old($locator, $shasum, $quick=false)
 {
     // submit the dataset for processing via whpipeline
     $in_dir = $GLOBALS['gBackendBaseDir'].'/upload/'.$shasum;

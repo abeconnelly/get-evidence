@@ -4,13 +4,18 @@ RUN  apt-get update && apt-get install -y apache2 apache2-threaded-dev ca-certif
   libapache2-mod-php5 libapache2-mod-python libmysqlclient15-dev \
   make mysql-client mysql-server patch \
   php5 php5-curl php5-dev php5-gd php5-mysql php-db \
-  python-biopython python-dev python-mysqldb python-pyrex \
+  python-biopython python-dev python-mysqldb python-pyrex ruby ruby-dev ruby-curb ruby-safe-yaml ruby-yaml-db jq \
   rsync unzip wget zip at --fix-missing && \
   a2enmod  php5 && \
   a2enmod rewrite && \
   a2enmod expires && \
   a2enmod negotiation
 
+# gem install curb yaml && \
+RUN cd /root && git clone https://github.com/curoverse/arvados && \
+  gem install arvados google-api-client json trollop && \
+  gem install activesupport andand oj &&
+  cp /root/arvados/sdk/cli/bin/* /usr/bin/
 
 RUN perl -ni~ -e 'print unless /www-data/' /etc/at.deny
 
@@ -108,5 +113,13 @@ RUN alias source='.' && cd /get-evidence/server/script && \
 EXPOSE 80
 
 COPY ./startup_and_persist.sh /root/startup_and_persist.sh
+
+COPY ./.arvenv /get-evidence/.arvenv
+COPY ./get-evidence.pipeline /get-evidence/public_html/lib
+COPY ./submit_GE_pipeline /get-evidence/public_html/submit_GE_pipeline
+
+
+RUN chown www-data:www-data /get-evidence/public_html/submit_GE_pipeline && \
+  chown www-data:www-data /get-evidence/public_html/.arvenv
 
 CMD [ "/root/startup_and_persist.sh" ]
