@@ -20,18 +20,9 @@ function run_whpipeline($locator, $shasum, $quick=false)
   }
   $status_json = $out_dir.'/whpipeline-status.json';
 
-  shell_exec(" echo cp >> /tmp/log2 ");
-
-  #$cmd = "submit_GE_pipeline";
   $cmd = "/get-evidence/public_html/submit_GE_pipeline";
   $cmd .= ' '.escapeshellarg( $locator );
   $cmd .= ' 2>&1 > '.escapeshellarg("$out_dir/whpipeline.stdout");
-
-  ##DEBUG
-  $z = 'echo ' . escapeshellarg($cmd) . ' | at now';
-  shell_exec( " echo RUNNING ".escapeshellarg($z)." >> /tmp/log " );
-  shell_exec( "echo 'echo hello '`date`' >> /tmp/t.log ' | at now" );
-
 
   shell_exec('echo ' . escapeshellarg($cmd) . ' | at now');
 }
