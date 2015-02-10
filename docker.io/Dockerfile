@@ -11,22 +11,21 @@ RUN  apt-get update && apt-get install -y apache2 apache2-threaded-dev ca-certif
   a2enmod expires && \
   a2enmod negotiation
 
-# gem install curb yaml && \
-RUN cd /root && git clone https://github.com/curoverse/arvados && \
-  gem install arvados google-api-client json trollop && \
-  gem install activesupport andand oj &&
-  cp /root/arvados/sdk/cli/bin/* /usr/bin/
-
 RUN perl -ni~ -e 'print unless /www-data/' /etc/at.deny
 
 ## TODO: abeconnelly holds some bug fixes.  Change to official repo
 #  when they have been merged
 #
-RUN git clone https://github.com/abeconnelly/get-evidence && \
+RUN cd / && git clone https://github.com/abeconnelly/get-evidence && \
   cd get-evidence && \
   make install && \
   cd /get-evidence/server && \
   chmod u+x genome_analyzer.py
+#
+# gem install curb yaml && \
+RUN cd /root && git clone https://github.com/curoverse/arvados && \
+  cp /root/arvados/sdk/cli/bin/* /usr/bin/ && \
+  gem install --no-user-install arvados google-api-client json trollop activesupport andand oj
 
 
 RUN perl -pi~ -e 's:\n:\ninit_connect=‘SET collation_connection = utf8_unicode_ci’\ninit_connect=‘SET NAMES utf8’\ncharacter-set-server=utf8\ncollation-server=utf8_unicode_ci\nskip-character-set-client-handshake\n: if m:\[mysqld\]:;' /etc/mysql/my.cnf
@@ -36,7 +35,7 @@ RUN service mysql start && echo "create database evidence character set = utf8; 
   grant all privileges on *.* to 'evidence'@'localhost'; flush privileges ; " | \
   mysql -u root
 
-RUN mkdir -p /home/trait/data ; chown www-data:www-data /home/trait
+RUN mkdir -p /home/trait/data && chown www-data:www-data /home/trait
 
 # RUN perl -pi~ -e 's;DocumentRoot /var/www/html;DocumentRoot /get-evidence/public_html\n<Directory /get-evidence/public_html>\nAllowOverride All\nphp_admin_value open_basedir "/get-evidence:/home/trait/data:/usr/share/php:/tmp:/dev/urandom"\nphp_value include_path ".:/get-evidence/public_html:/usr/share/php"\n</Directory>; if m:DocumentRoot /var/www/html:;' /etc/apache2/sites-available/000-default.conf
 
@@ -57,6 +56,7 @@ RUN service apache2 start && service mysql start && cd /tmp && wget localhost/in
 # THIS IS BRITTLE.  The ftp link will surely break in the near future
 #
 RUN service mysql start && cd /get-evidence && \
+  service mysql start && cd /get-evidence && \
   mkdir tmp && \
   wget -O/home/trait/data/genetests-data.txt ftp://ftp.ncbi.nih.gov/pub/GeneTests/data_to_build_custom_reports.txt && \
   chown www-data /home/trait/data/genetests-data.txt && \
@@ -114,12 +114,14 @@ EXPOSE 80
 
 COPY ./startup_and_persist.sh /root/startup_and_persist.sh
 
-COPY ./.arvenv /get-evidence/.arvenv
-COPY ./get-evidence.pipeline /get-evidence/public_html/lib
+COPY ./.arvenv /get-evidence/public_html/.arvenv
+COPY ./get-evidence.pipeline /get-evidence/public_html/lib/get-evidence.pipeline
 COPY ./submit_GE_pipeline /get-evidence/public_html/submit_GE_pipeline
 
 
 RUN chown www-data:www-data /get-evidence/public_html/submit_GE_pipeline && \
   chown www-data:www-data /get-evidence/public_html/.arvenv
+
+#RUN gem install --no-user-install arvados google-api-client json trollop activesupport andand oj
 
 CMD [ "/root/startup_and_persist.sh" ]
