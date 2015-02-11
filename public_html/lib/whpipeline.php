@@ -25,6 +25,13 @@ function run_whpipeline($locator, $shasum, $quick=false)
   $cmd .= ' 2>&1 > '.escapeshellarg("$out_dir/whpipeline.stdout");
 
   shell_exec('echo ' . escapeshellarg($cmd) . ' | at now');
+
+  $cmd = 'touch '.escapeshellarg($out_dir).'/whpipeline.lock > /dev/null 2>&1 ';
+  shell_exec( $cmd );
+
+  $cmd = 'touch '.escapeshellarg($out_dir).'/lock';
+  shell_exec( $cmd );
+
 }
 
 function run_whpipeline_old($locator, $shasum, $quick=false)
