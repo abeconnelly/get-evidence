@@ -12,7 +12,8 @@ RUN  apt-get update && apt-get install -y apache2 apache2-threaded-dev ca-certif
   a2enmod expires && \
   a2enmod negotiation
 
-RUN perl -ni~ -e 'print unless /www-data/' /etc/at.deny
+RUN perl -ni~ -e 'print unless /www-data/' /etc/at.deny && \
+  chmod a+r /etc/at.deny
 
 ## TODO: abeconnelly holds some bug fixes.  Change to official repo
 #  when they have been merged
@@ -25,7 +26,7 @@ RUN cd / && git clone https://github.com/abeconnelly/get-evidence && \
 #
 # gem install curb yaml && \
 RUN cd /root && git clone https://github.com/curoverse/arvados && \
-  cd /root/arvados && python setup.py install && \
+  cd /root/arvados/sdk/python && python setup.py install && \
   cp /root/arvados/sdk/cli/bin/* /usr/bin/ && \
   gem install --no-user-install arvados google-api-client json trollop activesupport andand oj
 
@@ -122,7 +123,9 @@ COPY ./submit_GE_pipeline /get-evidence/public_html/submit_GE_pipeline
 
 
 RUN chown www-data:www-data /get-evidence/public_html/submit_GE_pipeline && \
-  chown www-data:www-data /get-evidence/public_html/.arvenv
+  chown www-data:www-data /get-evidence/public_html/.arvenv && \
+  usermod -G daemon www-data && \
+  chmod u+x /get-evidence/public_html/submit_GE_pipeline
 
 #RUN gem install --no-user-install arvados google-api-client json trollop activesupport andand oj
 
