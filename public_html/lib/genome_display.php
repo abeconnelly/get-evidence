@@ -266,13 +266,12 @@ class GenomeReport {
     public function status() {
         $ret = array('progress' => 0, 'status' => 'unknown');
 
-        # arv pipeline_instance get --uuid su92l-d1hrv-13kiopejx7sawpt | jq ' .components | keys'
         $uuid = "";
         if (file_exists($this->whpipeline_stdout)) {
           $uuid = trim(file_get_contents($this->whpipeline_stdout));
         } else { return $ret; }
 
-        $cmd = "export HOME=/get-evidence && . /get-evidence/public_html/.arvenv && arv pipeline_instance get --uuid ".escapeshellarg($uuid);
+        $cmd = 'export HOME=/home/trait && arv pipeline_instance get --uuid '.escapeshellarg($uuid);
         $pipeline = json_decode(shell_exec($cmd), true);
 
         if ( $pipeline["components_summary"]["failed"] > 0 ) {
@@ -292,6 +291,7 @@ class GenomeReport {
             $n=1;
           }
           $ret["progress"] = $todo/$n;
+          $ret["status"] = "processing";
         }
 
         if ($ret["status"] == "success") {
@@ -305,7 +305,7 @@ class GenomeReport {
               // Fetch/update the local cache of the output data
               $od = escapeshellarg($this->output_directory);
 
-              $cmd = 'export HOME=/get-evidence && . /get-evidence/public_html/.arvenv && flock --wait 1 --exclusive --nonblock '
+              $cmd = 'export HOME=/home/trait && . $HOME/.config/arvados/settings.conf && flock --wait 1 --exclusive --nonblock '
                      .escapeshellarg($this->lockfile)
                      .' bash -c " arv-get --no-progress '.escapeshellarg($output_gff_hash).'/ '.$od.' && '
                      .' mv '.$od.'/out-data/* '.$od.' && rmdir '.$od.'/out-data && '
@@ -419,17 +419,13 @@ class GenomeReport {
             $data_size = @filesize ($this->sourcefile);
         else if (is_link($this->input_locator)) {
             $manifest = readlink ($this->input_locator);
-
-            //if (preg_match ('/ 0:(\d+)/', `whget $manifest`, $regs)) $data_size = $regs[1];
             $data_size = 1;
-
         }
         if ($data_size) {
             $head_data["Download"] = "<a href=\"/genome_download.php?" . 
                 "download_genome_id=" . $this->genomeID . 
                 "&amp;download_nickname=" . urlencode($realname) . 
                 $access_token_if_needed .
-                //"\">source data</a> (" . humanreadable_size($data_size) . ")";
                 "\">source data</a>";
         }
         $outdir = $GLOBALS["gBackendBaseDir"]."/upload/" . $this->genomeID . 
