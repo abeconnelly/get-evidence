@@ -18,7 +18,7 @@ RUN perl -ni~ -e 'print unless /www-data/' /etc/at.deny && \
 ## TODO: abeconnelly holds some bug fixes.  Change to official repo
 #  when they have been merged
 #
-RUN cd / && git clone https://github.com/abeconnelly/get-evidence && \
+RUN cd /home && git clone https://github.com/abeconnelly/get-evidence && \
   cd get-evidence && \
   make install && \
   cd /get-evidence/server && \
@@ -43,13 +43,13 @@ RUN mkdir -p /home/trait/data && chown www-data:www-data /home/trait
 # RUN perl -pi~ -e 's;DocumentRoot /var/www/html;DocumentRoot /get-evidence/public_html\n<Directory /get-evidence/public_html>\nAllowOverride All\nphp_admin_value open_basedir "/get-evidence:/home/trait/data:/usr/share/php:/tmp:/dev/urandom"\nphp_value include_path ".:/get-evidence/public_html:/usr/share/php"\n</Directory>; if m:DocumentRoot /var/www/html:;' /etc/apache2/sites-available/000-default.conf
 
 
-COPY ./config.php /get-evidence/public_html/config.php
+COPY ./config.php /home/get-evidence/public_html/config.php
 COPY ./apache2.conf /etc/apache2/apache2.conf
 COPY ./000-default.conf /etc/apache2/sites-available/000-default.conf
 COPY ./php5.conf /etc/apache2/mods-enabled/php5.conf
 
-COPY ./Consumer.php /get-evidence/php-openid/Auth/OpenID/Consumer.php
-COPY ./Manager.php /get-evidence/php-openid/Auth/Yadis/Manager.php
+COPY ./Consumer.php /home/get-evidence/php-openid/Auth/OpenID/Consumer.php
+COPY ./Manager.php /home/get-evidence/php-openid/Auth/Yadis/Manager.php
 
 RUN service apache2 start && service mysql start && cd /tmp && wget localhost/install.php && \
   wget http://evidence.personalgenomes.org/get-evidence.sql.gz && \
@@ -58,8 +58,8 @@ RUN service apache2 start && service mysql start && cd /tmp && wget localhost/in
 # dbSNP and GeneTests
 # THIS IS BRITTLE.  The ftp link will surely break in the near future
 #
-RUN service mysql start && cd /get-evidence && \
-  service mysql start && cd /get-evidence && \
+RUN service mysql start && cd /home/get-evidence && \
+  service mysql start && cd /home/get-evidence && \
   mkdir tmp && \
   wget -O/home/trait/data/genetests-data.txt ftp://ftp.ncbi.nih.gov/pub/GeneTests/data_to_build_custom_reports.txt && \
   chown www-data /home/trait/data/genetests-data.txt && \
@@ -75,7 +75,7 @@ RUN service mysql start && cd /get-evidence && \
 # a license for commercial use of the OMIM database may be sent
 # via e-mail to JHTT-Communications@jhmi.edu.
 # "
-#RUN service mysql start && cd /get-evidence && \
+#RUN service mysql start && cd /home/get-evidence && \
 #  wget -Otmp/OmimVarLocusIdSNP.bcp.gz ftp://ftp.ncbi.nlm.nih.gov/snp/organisms/human_9606/database/organism_data/OmimVarLocusIdSNP.bcp.gz && \
 #  gunzip tmp/OmimVarLocusIdSNP.bcp.gz && \
 #  make import_omim
@@ -83,17 +83,17 @@ RUN service mysql start && cd /get-evidence && \
 COPY get-evidence.ini /etc/php5/conf.d/get-evidence.ini
 
 RUN cd /get-evidence/server/script/ && \
-  USER=www-data SOURCE=/get-evidence CORE=/get-evidence/server \
+  USER=www-data SOURCE=/home/get-evidence CORE=/home/get-evidence/server \
   CONFIG=/home/trait/config TMP=/home/trait/tmp \
   DATA=/home/trait/data UPLOAD=/home/trait/upload LOG=/home/trait/log \
   BASE_URL=http://localhost/ ./configure.sh && \
-  . /get-evidence/server/script/config-local.sh && \
+  . /home/get-evidence/server/script/config-local.sh && \
   sudo -u $USER mkdir -p $TMP $UPLOAD $LOG $CONFIG $DATA
 
-RUN alias source='.' && cd /get-evidence/server/script && \
+RUN alias source='.' && cd /home/get-evidence/server/script && \
   export USER=www-data && \
-  export SOURCE=/get-evidence CORE=/get-evidence/server && \
-  export SCRIPT_DIR=/get-evidence/server/script && \
+  export SOURCE=/home/get-evidence CORE=/home/get-evidence/server && \
+  export SCRIPT_DIR=/home/get-evidence/server/script && \
   . $SCRIPT_DIR/configure.sh && \
   . ./defaults.sh && \
   perl -p -e 's/%([A-Z]+)%/$ENV{$1}/g' \
@@ -104,28 +104,35 @@ RUN alias source='.' && cd /get-evidence/server/script && \
   mv /etc/init.d/genome-analyzer.tmp /etc/init.d/genome-analyzer && \
   update-rc.d genome-analyzer start 20 2 3 4 5 . stop 80 0 1 6 .
 
-#RUN cd /get-evidence/server/script && \
+#RUN cd /home/get-evidence/server/script && \
 #  . ./config-local.sh && \
 #  sudo -u $USER ./install-user.sh
 
-#RUN cd /get-evidence/server && \
+#RUN cd /home/get-evidence/server && \
 #  python setup.py build_ext --inplace && \
-#  echo "12 3 * * * $USER cd /get-evidence && make daily" | sudo tee /etc/cron.d/get-evidence
+#  echo "12 3 * * * $USER cd /home/get-evidence && make daily" | sudo tee /etc/cron.d/get-evidence
 
 
 EXPOSE 80
 
 COPY ./startup_and_persist.sh /root/startup_and_persist.sh
 
-COPY ./.arvenv /get-evidence/public_html/.arvenv
-COPY ./get-evidence.pipeline /get-evidence/public_html/lib/get-evidence.pipeline
-COPY ./submit_GE_pipeline /get-evidence/public_html/submit_GE_pipeline
+COPY ./.arvenv /home/get-evidence/public_html/.arvenv
+COPY ./get-evidence.pipeline /home/get-evidence/public_html/lib/get-evidence.pipeline
+COPY ./submit_GE_pipeline /home/get-evidence/public_html/submit_GE_pipeline
 
 
-RUN chown www-data:www-data /get-evidence/public_html/submit_GE_pipeline && \
-  chown www-data:www-data /get-evidence/public_html/.arvenv && \
+RUN chown www-data:www-data /home/get-evidence/public_html/submit_GE_pipeline && \
+  chown www-data:www-data /home/get-evidence/public_html/.arvenv && \
   usermod -G daemon www-data && \
-  chmod u+x /get-evidence/public_html/submit_GE_pipeline
+  chmod u+x /home/get-evidence/public_html/submit_GE_pipeline
+
+## >>> WIP <<<
+##
+RUN gpg --keyserver hkp://keys.gnupg.net --recv-keys 409B6B1796C275462A1703113804BB82D39DC0E3 && \
+  \curl -sSL https://get.rvm.io | bash -s stable --ruby && \
+  apt-get install python-pip python-dev libattr1-dev libfuse-dev pkg-config python-yaml && \
+  gem install arvados google-api-client json trollop
 
 #RUN gem install --no-user-install arvados google-api-client json trollop activesupport andand oj
 
