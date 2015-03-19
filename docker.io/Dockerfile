@@ -40,7 +40,7 @@ RUN service mysql start && echo "create database evidence character set = utf8; 
 
 RUN mkdir -p /home/trait/data && chown www-data:www-data /home/trait
 
-# RUN perl -pi~ -e 's;DocumentRoot /var/www/html;DocumentRoot /home/get-evidence/public_html\n<Directory /home/get-evidence/public_html>\nAllowOverride All\nphp_admin_value open_basedir "/get-evidence:/home/trait/data:/usr/share/php:/tmp:/dev/urandom"\nphp_value include_path ".:/get-evidence/public_html:/usr/share/php"\n</Directory>; if m:DocumentRoot /var/www/html:;' /etc/apache2/sites-available/000-default.conf
+# RUN perl -pi~ -e 's;DocumentRoot /var/www/html;DocumentRoot /home/get-evidence/public_html\n<Directory /home/get-evidence/public_html>\nAllowOverride All\nphp_admin_value open_basedir "/home/get-evidence:/home/trait/data:/usr/share/php:/tmp:/dev/urandom"\nphp_value include_path ".:/home/get-evidence/public_html:/usr/share/php"\n</Directory>; if m:DocumentRoot /var/www/html:;' /etc/apache2/sites-available/000-default.conf
 
 
 COPY ./config.php /home/get-evidence/public_html/config.php
@@ -50,6 +50,8 @@ COPY ./php5.conf /etc/apache2/mods-enabled/php5.conf
 
 COPY ./Consumer.php /home/get-evidence/php-openid/Auth/OpenID/Consumer.php
 COPY ./Manager.php /home/get-evidence/php-openid/Auth/Yadis/Manager.php
+
+RUN cd /home/get-evidence/public_html && ln -s ../php-openid/Auth .
 
 RUN service apache2 start && service mysql start && cd /tmp && wget localhost/install.php && \
   wget http://evidence.personalgenomes.org/get-evidence.sql.gz && \
@@ -117,13 +119,11 @@ EXPOSE 80
 
 COPY ./startup_and_persist.sh /root/startup_and_persist.sh
 
-COPY ./.arvenv /home/get-evidence/public_html/.arvenv
 COPY ./get-evidence.pipeline /home/get-evidence/public_html/lib/get-evidence.pipeline
 COPY ./submit_GE_pipeline /home/get-evidence/public_html/submit_GE_pipeline
 
 
 RUN chown www-data:www-data /home/get-evidence/public_html/submit_GE_pipeline && \
-  chown www-data:www-data /home/get-evidence/public_html/.arvenv && \
   usermod -G daemon www-data && \
   chmod u+x /home/get-evidence/public_html/submit_GE_pipeline
 
@@ -131,8 +131,8 @@ RUN chown www-data:www-data /home/get-evidence/public_html/submit_GE_pipeline &&
 ##
 RUN gpg --keyserver hkp://keys.gnupg.net --recv-keys 409B6B1796C275462A1703113804BB82D39DC0E3 && \
   \curl -sSL https://get.rvm.io | bash -s stable --ruby && \
-  apt-get install python-pip python-dev libattr1-dev libfuse-dev pkg-config python-yaml && \
-  gem install arvados google-api-client json trollop
+  apt-get install -y python-pip python-dev libattr1-dev libfuse-dev pkg-config python-yaml && \
+  echo | gem install arvados google-api-client json trollop
 
 #RUN gem install --no-user-install arvados google-api-client json trollop activesupport andand oj
 
