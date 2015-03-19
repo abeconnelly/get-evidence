@@ -21,7 +21,7 @@ RUN perl -ni~ -e 'print unless /www-data/' /etc/at.deny && \
 RUN cd /home && git clone https://github.com/abeconnelly/get-evidence && \
   cd get-evidence && \
   make install && \
-  cd /get-evidence/server && \
+  cd /home/get-evidence/server && \
   chmod u+x genome_analyzer.py
 #
 # gem install curb yaml && \
@@ -40,7 +40,7 @@ RUN service mysql start && echo "create database evidence character set = utf8; 
 
 RUN mkdir -p /home/trait/data && chown www-data:www-data /home/trait
 
-# RUN perl -pi~ -e 's;DocumentRoot /var/www/html;DocumentRoot /get-evidence/public_html\n<Directory /get-evidence/public_html>\nAllowOverride All\nphp_admin_value open_basedir "/get-evidence:/home/trait/data:/usr/share/php:/tmp:/dev/urandom"\nphp_value include_path ".:/get-evidence/public_html:/usr/share/php"\n</Directory>; if m:DocumentRoot /var/www/html:;' /etc/apache2/sites-available/000-default.conf
+# RUN perl -pi~ -e 's;DocumentRoot /var/www/html;DocumentRoot /home/get-evidence/public_html\n<Directory /home/get-evidence/public_html>\nAllowOverride All\nphp_admin_value open_basedir "/get-evidence:/home/trait/data:/usr/share/php:/tmp:/dev/urandom"\nphp_value include_path ".:/get-evidence/public_html:/usr/share/php"\n</Directory>; if m:DocumentRoot /var/www/html:;' /etc/apache2/sites-available/000-default.conf
 
 
 COPY ./config.php /home/get-evidence/public_html/config.php
@@ -82,7 +82,7 @@ RUN service mysql start && cd /home/get-evidence && \
 
 COPY get-evidence.ini /etc/php5/conf.d/get-evidence.ini
 
-RUN cd /get-evidence/server/script/ && \
+RUN cd /home/get-evidence/server/script/ && \
   USER=www-data SOURCE=/home/get-evidence CORE=/home/get-evidence/server \
   CONFIG=/home/trait/config TMP=/home/trait/tmp \
   DATA=/home/trait/data UPLOAD=/home/trait/upload LOG=/home/trait/log \
