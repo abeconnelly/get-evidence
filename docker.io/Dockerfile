@@ -136,4 +136,6 @@ RUN gpg --keyserver hkp://keys.gnupg.net --recv-keys 409B6B1796C275462A170311380
 
 #RUN gem install --no-user-install arvados google-api-client json trollop activesupport andand oj
 
+# apt-get install libcurl4-gnutls-dev
+# gem install arvados arvados-cli
 CMD [ "/root/startup_and_persist.sh" ]

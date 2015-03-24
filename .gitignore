@@ -9,3 +9,5 @@ wz_tooltip
 tmp
 analysis_data_tarball.locator*
 .arvenv
+config.json
+settings.conf
