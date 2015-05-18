@@ -145,8 +145,9 @@ function openid_verify_oauth2() {
   if ($resp->error) {
       error_log(json_encode($http_response_header));
       $_SESSION["auth_error"] =  "An error occured";
+
       if ($resp->error_description) {
-        $_SESSION["auth_error"] = $resp->description;
+        $_SESSION["auth_error"] = $resp->error_description;
       }
       header ("Location: ./");
       exit;
