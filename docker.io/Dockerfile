@@ -5,7 +5,7 @@ RUN  apt-get update && apt-get install -y apache2 apache2-threaded-dev ca-certif
   make mysql-client mysql-server patch \
   php5 php5-curl php5-dev php5-gd php5-mysql php-db \
   python-biopython python-dev python-mysqldb python-pyrex ruby ruby-dev ruby-curb ruby-safe-yaml ruby-yaml-db jq \
-  python-setuptools \
+  python-setuptools libcurl4-gnutls-dev \
   rsync unzip wget zip at --fix-missing && \
   a2enmod  php5 && \
   a2enmod rewrite && \
@@ -28,7 +28,7 @@ RUN cd /home && git clone https://github.com/abeconnelly/get-evidence && \
 RUN cd /root && git clone https://github.com/curoverse/arvados && \
   cd /root/arvados/sdk/python && python setup.py install && \
   cp /root/arvados/sdk/cli/bin/* /usr/bin/ && \
-  gem install --no-user-install arvados google-api-client json trollop activesupport andand oj
+  gem install --no-user-install arvados arvados-cli google-api-client json trollop activesupport andand oj
 
 
 RUN perl -pi~ -e 's:\n:\ninit_connect=‘SET collation_connection = utf8_unicode_ci’\ninit_connect=‘SET NAMES utf8’\ncharacter-set-server=utf8\ncollation-server=utf8_unicode_ci\nskip-character-set-client-handshake\n: if m:\[mysqld\]:;' /etc/mysql/my.cnf
@@ -131,7 +131,7 @@ RUN chown www-data:www-data /home/get-evidence/public_html/submit_GE_pipeline &&
 ##
 RUN gpg --keyserver hkp://keys.gnupg.net --recv-keys 409B6B1796C275462A1703113804BB82D39DC0E3 && \
   \curl -sSL https://get.rvm.io | bash -s stable --ruby && \
-  apt-get install -y python-pip python-dev libattr1-dev libfuse-dev pkg-config python-yaml && \
+  apt-get install -y python-pip python-dev libattr1-dev libfuse-dev pkg-config python-yaml telnet && \
   echo | gem install arvados google-api-client json trollop
 
 #RUN gem install --no-user-install arvados google-api-client json trollop activesupport andand oj
