@@ -182,13 +182,6 @@ function openid_verify_oauth2() {
     $fullname = $userinfo->name;
   }
 
-  // Migrate old OpenID to new OAuth2 ID if applicable.
-  //
-  if (in_array( "openid_id", $id_payload )) {
-    $openid = $id_payload->openid_id;
-    migrate_openid($openid, $user_id);
-  }
-
   // Finally, update user information and save session state.
   //
   $sreg = array( 'email' => $user_email, 'fullname' => $fullname );
@@ -251,11 +244,6 @@ function openid_verify() {
 
   $_SESSION["auth_error"] = $msg;
   return false;
-}
-
-function migrate_openid_user ($openid, $user_id) {
-  openid_create_tables ();
-  theDb()->query ('update eb_users set oid=? where oid=?', array ($openid, $user_id));
 }
 
 function openid_user_update ($openid, $sreg)
