@@ -1,6 +1,6 @@
 FROM ubuntu:14.10
 
-RUN  apt-get update && apt-get install -y apache2 apache2-threaded-dev ca-certificates cron curl git-core \
+RUN apt-get update && apt-get install -y apache2 apache2-threaded-dev ca-certificates cron curl git-core \
   libapache2-mod-php5 libapache2-mod-python libmysqlclient15-dev \
   make mysql-client mysql-server patch \
   php5 php5-curl php5-dev php5-gd php5-mysql php-db \
@@ -23,6 +23,9 @@ RUN cd /home && git clone https://github.com/abeconnelly/get-evidence && \
   make install && \
   cd /home/get-evidence/server && \
   chmod u+x genome_analyzer.py
+
+RUN apt-get install -y libgnutls-dev gnutls-bin python-pycurl python-gnutls
+
 #
 # gem install curb yaml && \
 RUN cd /root && git clone https://github.com/curoverse/arvados && \
